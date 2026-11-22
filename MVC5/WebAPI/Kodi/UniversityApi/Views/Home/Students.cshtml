@@ -1,0 +1,85 @@
+@{
+    ViewBag.Title = "Studentët (jQuery)";
+}
+
+<h2>Studentët (jQuery + Web API)</h2>
+
+<div class="row" style="margin-bottom: 16px;">
+    <div class="col-md-3"><input id="firstName" class="form-control" placeholder="Emri" /></div>
+    <div class="col-md-3"><input id="lastName" class="form-control" placeholder="Mbiemri" /></div>
+    <div class="col-md-4"><input id="email" class="form-control" placeholder="Email" /></div>
+    <div class="col-md-2"><button id="btnAdd" class="btn btn-primary">Shto</button></div>
+</div>
+
+<p id="message" class="text-danger"></p>
+
+<table class="table table-striped">
+    <thead>
+        <tr><th>Id</th><th>Emri</th><th>Mbiemri</th><th>Email</th><th></th></tr>
+    </thead>
+    <tbody id="studentsBody"></tbody>
+</table>
+
+@section scripts {
+    <script>
+        var apiUrl = "/api/students";
+
+        // GET: lexo studentët dhe mbush tabelën
+        function loadStudents() {
+            $.getJSON(apiUrl)
+                .done(function (students) {
+                    var body = $("#studentsBody").empty();
+                    $.each(students, function (i, s) {
+                        var row = $("<tr>");
+                        row.append($("<td>").text(s.id));
+                        row.append($("<td>").text(s.firstName));
+                        row.append($("<td>").text(s.lastName));
+                        row.append($("<td>").text(s.email));
+                        var btn = $("<button>").addClass("btn btn-danger btn-sm btn-delete")
+                                               .attr("data-id", s.id).text("Fshij");
+                        row.append($("<td>").append(btn));
+                        body.append(row);
+                    });
+                })
+                .fail(function () {
+                    $("#message").text("Gabim gjatë leximit të studentëve.");
+                });
+        }
+
+        // POST: shto student të ri
+        $("#btnAdd").click(function () {
+            var student = {
+                firstName: $("#firstName").val(),
+                lastName: $("#lastName").val(),
+                email: $("#email").val()
+            };
+
+            $.ajax({
+                url: apiUrl,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(student)
+            })
+            .done(function () {
+                $("#message").text("");
+                $("#firstName, #lastName, #email").val("");
+                loadStudents();
+            })
+            .fail(function (xhr) {
+                $("#message").text("Studenti nuk u ruajt (status " + xhr.status + "). Kontrollo fushat.");
+            });
+        });
+
+        // DELETE: fshij student
+        $("#studentsBody").on("click", ".btn-delete", function () {
+            var id = $(this).data("id");
+            $.ajax({ url: apiUrl + "/" + id, type: "DELETE" })
+                .done(loadStudents);
+        });
+
+        // Kur faqja ngarkohet, lexo studentët
+        $(function () {
+            loadStudents();
+        });
+    </script>
+}
