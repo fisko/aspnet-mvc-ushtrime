@@ -4,6 +4,8 @@
 
 **Kohëzgjatja:** 90 minuta · **Niveli:** fillestar · **Mjetet:** Visual Studio 2022, .NET Framework 4.8, EF6, SQL Server LocalDB, Postman
 
+> **Nëse ngec:** te folderi [Kodi](Kodi) gjen klasat e ushtrimit që mund t'i krahasosh ose t'i kopjosh.
+
 ## Përmbajtja
 
 - [Çfarë është Web API?](#çfarë-është-web-api)

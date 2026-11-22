@@ -1,0 +1,5 @@
+<connectionStrings>
+  <add name="UniversityContext"
+       connectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=UniversityDb;Integrated Security=True;MultipleActiveResultSets=True"
+       providerName="System.Data.SqlClient" />
+</connectionStrings>

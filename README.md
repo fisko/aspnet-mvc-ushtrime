@@ -36,6 +36,7 @@ aspnet-mvc-ushtrime/
 ├── MVC5/
 │   └── WebAPI/
 │       ├── README.md              ← ushtrimi
+│       ├── Kodi/                  ← klasat e ushtrimit
 │       └── img/                   ← vizatimet
 └── Core10/                        ← ushtrimet me ASP.NET Core 10
 ```
