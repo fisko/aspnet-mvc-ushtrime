@@ -36,16 +36,7 @@ aspnet-mvc-ushtrime/
 ├── MVC5/
 │   └── WebAPI/
 │       ├── README.md              ← ushtrimi
-│       ├── img/                   ← vizatimet
-│       └── Pikat-e-kontrollit/
-│           ├── Pas-Pjeses-3/
-│           └── Pas-Pjeses-5/
+│       └── img/                   ← vizatimet
 └── Core10/                        ← ushtrimet me ASP.NET Core 10
 ```
 
-## Si hapet një pikë kontrolli
-
-1. Hap skedarin `.sln` te folderi i pikës së kontrollit.
-2. Shtyp **Ctrl+Shift+B**. Visual Studio i shkarkon vetë paketat NuGet.
-3. Te **Package Manager Console** ekzekuto `Update-Database`.
-4. Vazhdo me pjesën tjetër të ushtrimit.
