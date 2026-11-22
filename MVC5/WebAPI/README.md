@@ -4,8 +4,6 @@
 
 **Kohëzgjatja:** 90 minuta · **Niveli:** fillestar · **Mjetet:** Visual Studio 2022, .NET Framework 4.8, EF6, SQL Server LocalDB, Postman
 
-> **Nëse ngec:** te folderi [`Pikat-e-kontrollit`](Pikat-e-kontrollit) gjen projektin në gjendjen pas Pjesës 3 dhe pas Pjesës 5. Mund të vazhdosh prej andej.
-
 ## Përmbajtja
 
 - [Çfarë është Web API?](#çfarë-është-web-api)
@@ -446,8 +444,6 @@ Në konsolë shfaqen mesazhet `Applying explicit migrations: [..._InitialCreate]
 - Databaza `UniversityDb` ka tabelat `Students`, `Courses`, `Enrollments` dhe `__MigrationHistory`.
 - `Students` ka 3 rreshta, `Courses` ka 3 rreshta, `Enrollments` ka 3 rreshta.
 
-> **Nëse ngec:** hap [`Pikat-e-kontrollit/Pas-Pjeses-3`](Pikat-e-kontrollit/Pas-Pjeses-3), ekzekuto `Update-Database` dhe vazhdo me Pjesën 4.
-
 ### Pyetje kontrolli
 
 1. Cila komandë krijon skedarin e migrimit dhe cila e zbaton në databazë?
@@ -820,8 +816,6 @@ Në testin 5 përdor Id-në që të ktheu testi 3 (nëse nuk është 4, ndryshoj
 - Të 10 testet kthejnë statusin e pritur.
 - `/api/enrollments` shfaq emrat e studentëve dhe titujt e kurseve, jo vetëm numrat.
 - API-ja mbetet e hapur (nisur me Ctrl+F5) për pjesët e ardhshme.
-
-> **Nëse ngec:** hap [`Pikat-e-kontrollit/Pas-Pjeses-5`](Pikat-e-kontrollit/Pas-Pjeses-5), ekzekuto `Update-Database`, nise me Ctrl+F5 dhe vazhdo me Pjesën 6.
 
 ### Pyetje kontrolli
 
@@ -1314,6 +1308,14 @@ Për secilin veprim krijo një view: kliko me të djathtën brenda metodës → 
 
 Lëre të shenjuar **Use a layout page** dhe kliko **Add**. Pasi nuk ka Entity Framework në këtë projekt, fusha **Data context class** mbetet bosh.
 
+**Rregullo lidhjet te `Index.cshtml`.** Pasi projekti nuk ka Entity Framework, scaffolding nuk e di cili është çelësi primar dhe gjeneron `new { /* id=item.PrimaryKey */ }` te lidhjet **Edit**, **Details** dhe **Delete**. Pa `id` ato nuk punojnë. Hap `Views/Students/Index.cshtml` dhe zëvendësoji me:
+
+```html
+@Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+@Html.ActionLink("Details", "Details", new { id = item.Id }) |
+@Html.ActionLink("Delete", "Delete", new { id = item.Id })
+```
+
 **Hapi 7: Shto lidhje te menyja**
 
 Te `Views/Shared/_Layout.cshtml` shto brenda `<ul class="nav navbar-nav">`:
@@ -1333,7 +1335,7 @@ Te `Views/Shared/_Layout.cshtml` shto brenda `<ul class="nav navbar-nav">`:
 
 **Hapi 9: Provo ç'ndodh kur API-ja është e ndalur**
 
-Ndalo projektin `UniversityApi` (**Shift+F5** në Visual Studio e parë) dhe rifresko `/Students`. Do shohësh një gabim (`HttpRequestException`): serveri MVC nuk arriti te API-ja. Kjo tregon varësinë: klienti nuk punon pa API-në. Në një projekt real këtu shtohet `try/catch` dhe një mesazh miqësor.
+Ndalo projektin `UniversityApi` (**Shift+F5** në Visual Studio e parë) dhe rifresko `/Students`. Do shohësh ekranin e verdhë të gabimit (`HttpRequestException`): serveri MVC nuk arriti te API-ja. Kjo tregon varësinë: klienti nuk punon pa API-në. Në një projekt real këtu shtohet `try/catch` dhe një mesazh miqësor.
 
 **Hapi 10: Ushtrim i pavarur, CRUD për Course**
 
