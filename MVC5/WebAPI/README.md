@@ -631,6 +631,10 @@ Browser-i dërgon vetëm GET. Për POST, PUT dhe DELETE do përdorim Postman në
 
 Përsërit Hapin 2 por me **Model class** `Course` dhe **Controller name** `CoursesController`. Pastaj hap `http://localhost:5050/api/courses`. Duhet të shohësh 3 kurse.
 
+Përgjigja e `/api/students` në browser:
+
+![JSON i /api/students](img/01-api-students.png)
+
 ### Pika e kontrollit
 
 - `/api/students` kthen 3 studentë në JSON.
@@ -812,6 +816,10 @@ Për POST dhe PUT: zgjidh skedën **Body**, zgjidh **raw** dhe në listën e dja
 | 10 | POST `/api/enrollments` (e njëjta) | `{"studentId":3,"courseId":1,"grade":8}` | 409 Conflict |
 
 Në testin 5 përdor Id-në që të ktheu testi 3 (nëse nuk është 4, ndryshoje në URL dhe në body).
+
+Përgjigja e `/api/enrollments` në browser:
+
+![JSON i /api/enrollments](img/02-api-enrollments.png)
 
 ### Pika e kontrollit
 
@@ -1014,6 +1022,10 @@ config.EnableCors(new EnableCorsAttribute("*", "*", "*"));
 5. Nise API-në përsëri me Ctrl+F5 dhe rifresko `students.html`. Tani lista shfaqet.
 
 Shënim: `"*"` lejon çdo origjinë. Për trajnim është në rregull, por në një sistem real lejohen vetëm adresat e njohura të klientëve.
+
+Faqja jQuery duhet të duket kështu:
+
+![Faqja jQuery me tabelën e studentëve](img/03-jquery-students.png)
 
 ### Pika e kontrollit
 
@@ -1346,6 +1358,12 @@ Përsërit Hapat 5, 6 dhe 7 për kurset: `CoursesController` me `Url = "api/cour
 **Alternativë: të dy projektet në një Solution**
 
 Nëse dëshiron vetëm një Visual Studio: kliko me të djathtën mbi Solution → **Add → New Project** (shto `UniversityMvcClient`), pastaj mbi Solution → **Properties → Startup Project → Multiple startup projects** dhe vendos **Action: Start** për të dy projektet, me `UniversityApi` së pari. Me **F5** nisen të dy bashkë.
+
+Klienti MVC duhet të duket kështu: lista e studentëve dhe forma Create.
+
+![Klienti MVC: lista e studentëve](img/04-mvc-index.png)
+
+![Klienti MVC: forma Create](img/05-mvc-create.png)
 
 ### Pika e kontrollit
 
