@@ -1,0 +1,62 @@
+### =====================================================================
+### University.http - testo API-në direkt nga Visual Studio (Pjesa 1)
+### Kliko "Send request" mbi çdo kërkesë. Kërkesat ndahen me ###.
+### Porti duhet të përputhet me Properties/launchSettings.json (profili https).
+### =====================================================================
+
+@host = https://localhost:7232
+
+### 1) Lista e kurseve
+GET {{host}}/api/courses
+
+### 2) Një kurs (Id = 1)
+GET {{host}}/api/courses/1
+
+### 3) Krijo kurs -> 201 Created
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "code": "WEB201",
+  "title": "Zhvillimi i aplikacioneve Web",
+  "credits": 6,
+  "departmentId": 1,
+  "professorId": 1
+}
+
+### 4) Validim -> 400 (Credits jashtë 1-12)
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "code": "X1",
+  "title": "Kurs i gabuar",
+  "credits": 50,
+  "departmentId": 1
+}
+
+### 5) Kod i përsëritur -> 409 Conflict (dërgoje kërkesën 3 dy herë)
+
+### 6) Studentët dhe detajet (me mesataren)
+GET {{host}}/api/students
+
+###
+GET {{host}}/api/students/1
+
+### 7) Regjistro studenten 3 (Liridona) në kursin 1 (PV101) -> 201
+###    Dërgoje sërish -> 409 (është regjistruar tashmë)
+POST {{host}}/api/enrollments
+Content-Type: application/json
+
+{
+  "studentId": 3,
+  "courseId": 1
+}
+
+### 8) Vendos notën te regjistrimi 4 (Liridona - RK301, ende pa notë) -> 204
+PUT {{host}}/api/enrollments/4/grade
+Content-Type: application/json
+
+{
+  "grade": 9
+}

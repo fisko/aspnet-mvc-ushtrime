@@ -1,0 +1,110 @@
+### =====================================================================
+### University.http - testo API-në me JWT (Pjesa 2)
+### Kliko "Send request" mbi çdo kërkesë. Ekzekutoji me radhë!
+### Porti duhet të përputhet me Properties/launchSettings.json (profili https).
+### =====================================================================
+
+@host = https://localhost:7232
+
+### 1) Kurset - publike, pa token -> 200
+GET {{host}}/api/courses
+
+### 2) Studentët PA token -> 401 Unauthorized ("kush je?")
+GET {{host}}/api/students
+
+### 3) Hyrje si Admin -> marrim JWT
+# @name admin
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@uni.test",
+  "password": "Parola123!"
+}
+
+### Tokeni ruhet automatikisht nga përgjigja e mësipërme
+@adminToken = {{admin.response.body.$.token}}
+
+### 4) Kush jam? -> email-i dhe rolet nga tokeni
+GET {{host}}/api/auth/me
+Authorization: Bearer {{adminToken}}
+
+### 5) Studentët ME token -> 200
+GET {{host}}/api/students
+Authorization: Bearer {{adminToken}}
+
+### 6) Kurs i ri (vetëm Admin) -> 201
+POST {{host}}/api/courses
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "code": "WEB202",
+  "title": "Aplikacione Web të avancuara",
+  "credits": 6,
+  "departmentId": 1,
+  "professorId": 1
+}
+
+### 7) Hyrje si studentja Ana (Id = 1)
+# @name ana
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana.gashi@student.test",
+  "password": "Parola123!"
+}
+
+###
+@anaToken = {{ana.response.body.$.token}}
+
+### 8) Ana provon të krijojë kurs -> 403 Forbidden ("e di kush je, por s'ke leje")
+POST {{host}}/api/courses
+Authorization: Bearer {{anaToken}}
+Content-Type: application/json
+
+{
+  "code": "HACK1",
+  "title": "Kurs i paautorizuar",
+  "credits": 1,
+  "departmentId": 1
+}
+
+### 9) Ana regjistron VETEN (studentId 1) në RK301 (courseId 3) -> 201
+POST {{host}}/api/enrollments
+Authorization: Bearer {{anaToken}}
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "courseId": 3
+}
+
+### 10) Ana provon të regjistrojë DRENIN (studentId 2) -> 403 (mbrojtja IDOR)
+POST {{host}}/api/enrollments
+Authorization: Bearer {{anaToken}}
+Content-Type: application/json
+
+{
+  "studentId": 2,
+  "courseId": 2
+}
+
+### 11) Ana provon të vendosë notë -> 403 (vetëm Admin/Professor)
+PUT {{host}}/api/enrollments/4/grade
+Authorization: Bearer {{anaToken}}
+Content-Type: application/json
+
+{
+  "grade": 10
+}
+
+### 12) Admini vendos notën -> 204
+PUT {{host}}/api/enrollments/4/grade
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "grade": 8
+}

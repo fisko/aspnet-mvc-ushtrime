@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="330" viewBox="0 0 900 330" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#444"/></marker>
+  </defs>
+  <rect width="900" height="330" fill="#fff"/>
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#222">Nga vjen konfigurimi? (builder.Configuration)</text>
+
+  <g font-size="13">
+    <rect x="30" y="60" width="440" height="50" rx="8" fill="#eceff1" stroke="#78909c"/>
+    <text x="45" y="83" font-weight="bold">1. appsettings.json</text>
+    <text x="45" y="101" font-size="12" fill="#444">vlerat bazë - shkon në GitHub (pa sekrete!)</text>
+
+    <rect x="30" y="120" width="440" height="50" rx="8" fill="#e3f2fd" stroke="#1e88e5"/>
+    <text x="45" y="143" font-weight="bold">2. appsettings.Development.json</text>
+    <text x="45" y="161" font-size="12" fill="#444">vetëm kur ASPNETCORE_ENVIRONMENT = Development</text>
+
+    <rect x="30" y="180" width="440" height="50" rx="8" fill="#fff3e0" stroke="#fb8c00"/>
+    <text x="45" y="203" font-weight="bold">3. User Secrets  (dotnet user-secrets set ...)</text>
+    <text x="45" y="221" font-size="12" fill="#444">vetëm Development, jashtë projektit - p.sh. Jwt:Key</text>
+
+    <rect x="30" y="240" width="440" height="50" rx="8" fill="#e8f5e9" stroke="#43a047"/>
+    <text x="45" y="263" font-weight="bold">4. Variablat e mjedisit / Azure App Settings</text>
+    <text x="45" y="281" font-size="12" fill="#444">Jwt__Key, ConnectionStrings__UniversityDb ( : → __ )</text>
+  </g>
+
+  <line x1="500" y1="70" x2="500" y2="285" stroke="#444" stroke-width="3" marker-end="url(#a)"/>
+  <text x="515" y="180" font-size="13" fill="#444">i fundit FITON</text>
+  <text x="515" y="198" font-size="12" fill="#666">(mbishkruan vlerën me</text>
+  <text x="515" y="214" font-size="12" fill="#666">të njëjtin çelës)</text>
+
+  <rect x="660" y="120" width="220" height="110" rx="10" fill="#f3e5f5" stroke="#8e24aa" stroke-width="2"/>
+  <text x="770" y="150" text-anchor="middle" font-size="14" font-weight="bold">Në kod:</text>
+  <text x="770" y="176" text-anchor="middle" font-size="11" font-family="Consolas, monospace">Configuration["Jwt:Key"]</text>
+  <text x="770" y="196" text-anchor="middle" font-size="11" font-family="Consolas, monospace">GetConnectionString(</text>
+  <text x="770" y="212" text-anchor="middle" font-size="11" font-family="Consolas, monospace">"UniversityDb")</text>
+  <line x1="640" y1="175" x2="658" y2="175" stroke="#8e24aa" stroke-width="2" marker-end="url(#a)"/>
+</svg>

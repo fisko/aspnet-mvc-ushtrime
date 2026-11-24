@@ -1,0 +1,39 @@
+@* @model = tipi i të dhënave që i dërgon controller-i: return View(courses) *@
+@model List<Course>
+@{
+    ViewData["Title"] = "Kurset";
+}
+
+<h1>Kurset</h1>
+
+@* Butoni shfaqet vetëm për Admin. KUJDES: kjo vetëm e FSHEH butonin -
+   mbrojtja e vërtetë është [Authorize(Roles = "Admin")] te controller-i. *@
+@if (User.IsInRole("Admin"))
+{
+    <p><a asp-action="Create" class="btn btn-primary">Kurs i ri</a></p>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Kodi</th>
+            <th>Titulli</th>
+            <th>Kreditet</th>
+            <th>Departamenti</th>
+            <th>Profesori</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* @ kalon nga HTML në C#. Razor e enkodon tekstin automatikisht (mbrojtje nga XSS). *@
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Code</td>
+                <td>@c.Title</td>
+                <td>@c.Credits</td>
+                <td>@c.Department?.Name</td>
+                <td>@(c.Professor?.FullName ?? "-")</td>
+            </tr>
+        }
+    </tbody>
+</table>
