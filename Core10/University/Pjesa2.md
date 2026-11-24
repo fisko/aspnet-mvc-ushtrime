@@ -108,6 +108,8 @@ dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version "
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer     --version "10.0.*"
 ```
 
+> 💡 **Sqarim:** `Identity.EntityFrameworkCore` sjell Identity-n dhe ruajtjen e përdoruesve me EF Core (në të njëjtën bazë). `JwtBearer` sjell middleware-in që lexon header-in `Authorization: Bearer ...`, verifikon nënshkrimin dhe e kthen tokenin në `User`. Cookie-t s'kanë nevojë për paketë: janë pjesë e ASP.NET Core.
+
 ### Hapi 2: Përdoruesi dhe DbContext-i
 
 1. Krijo [`Models/ApplicationUser.cs`](Kodi/Pjesa2/Models/ApplicationUser.cs). Ai trashëgon nga `IdentityUser` (që ka `Email`, `PasswordHash`...) dhe shton `FullName`.
@@ -121,6 +123,17 @@ public class UniversityContext(...) : IdentityDbContext<ApplicationUser>(options
 ```
 
 > ⚠️ `base.OnModelCreating(modelBuilder)` **duhet** të mbetet rreshti i parë te `OnModelCreating`, sepse aty Identity konfiguron tabelat e veta.
+
+> 💡 **Sqarim: tabelat që shton `IdentityDbContext`.**
+>
+> | Tabela | Përmbajtja |
+> |---|---|
+> | `AspNetUsers` | përdoruesit: `Email`, `PasswordHash`, `LockoutEnd`, `AccessFailedCount` + fusha jonë `FullName` |
+> | `AspNetRoles` | rolet: Admin, Professor, Student |
+> | `AspNetUserRoles` | kush ka cilin rol (shumë-me-shumë, si `Enrollments`) |
+> | `AspNetUserClaims`, `AspNetUserLogins`, `AspNetUserTokens`, `AspNetRoleClaims` | për claims shtesë, login me Google/Microsoft, tokenë; s'i përdorim, por krijohen |
+>
+> Përdoruesi i Identity (`ApplicationUser`) dhe studenti (`Student`) janë **dy gjëra të ndryshme**: i pari është llogaria për hyrje, i dyti janë të dhënat akademike. I lidhim me **email-in**.
 
 ### Hapi 3: Sekretet: User Secrets
 
@@ -170,6 +183,12 @@ return new TokenResult(new JsonWebTokenHandler().CreateToken(descriptor), expire
 
 Klasa `JwtOptions` lidhet me seksionin `"Jwt"` të konfigurimit (**Options pattern**). Nëse s'e vendosni në `appsettings.json`, përdoren vlerat default: `Issuer = "University"`, `Audience = "UniversityClients"`, 60 minuta.
 
+> 💡 **Sqarim:**
+> - **Claim** = një pohim për përdoruesin, në formën *lloji = vlera* (`email = ana.gashi@student.test`, `role = Student`). Pas validimit, ASP.NET Core i vendos te `User.Claims`. Kështu `User.IsInRole("Admin")` dhe `User.Identity.Name` punojnë **pa** pyetur bazën.
+> - **Issuer** (`iss`) = kush e lëshoi tokenin; **Audience** (`aud`) = për kë është. Serveri refuzon tokenë me vlera të tjera (p.sh. nga një aplikacion tjetër që rastësisht ka të njëjtin çelës).
+> - **Options pattern**: në vend të `config["Jwt:Key"]` të shpërndara nëpër kod, seksioni `"Jwt"` lidhet një herë me klasën `JwtOptions` dhe merret me DI si `IOptions<JwtOptions>`. Kjo e bën shërbimin të lehtë për t'u testuar: testet i japin opsionet me `Options.Create(...)`.
+> - Rolet **ngrihen brenda tokenit** në momentin e login-it. Nëse Admini ia ndryshon rolin dikujt, ndryshimi vlen vetëm për tokenin **e ardhshëm**. Prandaj tokenët kanë jetë të shkurtër.
+
 ### Hapi 5: `Program.cs` përfundimtar
 
 Zëvendëso [`Program.cs`](Kodi/Pjesa2/Program.cs). Krahasuar me Pjesën 1 u shtuan:
@@ -185,6 +204,14 @@ Zëvendëso [`Program.cs`](Kodi/Pjesa2/Program.cs). Krahasuar me Pjesën 1 u sht
 | `app.UseAuthentication();` | **para** `UseAuthorization()` |
 
 > ❓ Pse rendi `UseAuthentication()` → `UseAuthorization()`? Shikoni [pipeline-in](img/pipeline.svg): autorizimi duhet ta dijë **kush** je para se të vendosë **a ke leje**. Nëse i ndërroni, `User` është gjithmonë anonim dhe çdo `[Authorize]` kthen 401/302.
+
+> 💡 **Sqarim: çfarë ndodh me një kërkesë me `[Authorize]`?**
+>
+> 1. `UseAuthentication()` lexon cookie-n (skema default). Kërkesat API kërkojnë skemën JWT, prandaj për to lexohet header-i `Authorization`. Nëse janë të vlefshme, mbushet `User` me claims.
+> 2. `UseAuthorization()` lexon atributet e endpoint-it (`Roles`, `Policy`) dhe i krahason me `User`.
+> 3. S'ka `User` → **challenge**: cookie → 302 te Login; JWT → 401.
+> 4. Ka `User`, por s'ka leje → **forbid**: cookie → 302 te AccessDenied; JWT → 403.
+> 5. Në rregull → ekzekutohet controller-i.
 
 ### Hapi 6: Rolet, përdoruesit shembull dhe migrimi
 
@@ -206,6 +233,8 @@ dotnet ef migrations add AddIdentity
 
    Hapni migrimin: duhet të shihni `CreateTable(name: "AspNetUsers"...)`, `AspNetRoles`, etj. Tabelat tuaja **nuk** preken.
 
+> 💡 **Sqarim:** seed-i i Identity përdor `RoleManager` dhe `UserManager`, **jo** `db.Users.Add(...)`. Arsyeja: `userManager.CreateAsync(user, password)` e kontrollon fjalëkalimin sipas rregullave, e ruan si **hash** (PBKDF2 me salt) dhe plotëson fushat e normalizuara (`NormalizedEmail`) që përdoren gjatë kërkimit. Seed-i kontrollon `RoleExistsAsync` / `FindByEmailAsync` para krijimit, kështu që rinisja e aplikacionit s'krijon dublikata.
+
 ### Hapi 7: Faqet MVC: login, regjistrim, menyja
 
 | Skedari | Çfarë bën |
@@ -226,6 +255,8 @@ Dy detaje sigurie te `AccountController`:
 - `LocalRedirect(Url.IsLocalUrl(returnUrl) ? returnUrl : "/")`: mbron nga **open redirect** (`/Account/Login?returnUrl=https://faqe-e-keqe.com`).
 
 > ⚠️ Fshehja e butonit me `@if (User.IsInRole("Admin"))` është vetëm **UX**. Mbrojtja e vërtetë është `[Authorize]` te controller-i: kushdo mund ta shkruajë `/Courses/Create` direkt në shfletues.
+
+> 💡 **Sqarim: `PasswordSignInAsync` vs `SignInAsync`.** Te **Login**, `PasswordSignInAsync` kontrollon fjalëkalimin (dhe numëron tentimet e gabuara për lockout), pastaj krijon cookie-n `.AspNetCore.Identity.Application`. Te **Register**, fjalëkalimi sapo u vendos, prandaj përdorim `SignInAsync`, që krijon cookie-n direkt. Cookie-n mund ta shihni te shfletuesi: **F12 → Application → Cookies**. Është e enkriptuar dhe `HttpOnly` (JavaScript s'e lexon dot).
 
 Nis aplikacionin (**F5**). Migrimi `AddIdentity` aplikohet automatikisht. Provo:
 
@@ -249,6 +280,8 @@ Nis aplikacionin (**F5**). Migrimi `AddIdentity` aplikohet automatikisht. Provo:
 | [`EnrollmentsApiController.cs`](Kodi/Pjesa2/Controllers/Api/EnrollmentsApiController.cs) | regjistrimi → `Roles = "Admin,Student"` + **kontrolli IDOR**; nota → `Policy = "GradeEditors"` |
 
 `AuthApiController.Login` përdor `CheckPasswordSignInAsync`, që kontrollon fjalëkalimin **pa krijuar cookie**, dhe kthen **të njëjtin 401** si për email që s'ekziston ashtu edhe për fjalëkalim të gabuar. Kështu sulmuesi s'mëson dot cilat email-e ekzistojnë.
+
+> 💡 **Sqarim: atributet në nivel klase dhe metode.** `[Authorize(AuthenticationSchemes = JwtBearer...)]` te klasa vlen për **çdo** metodë dhe thotë "përdor JWT, jo cookie". Atributet te metoda **shtohen** mbi të: `[Authorize(Roles = "Admin")]` do të thotë JWT **dhe** rol Admin. Përjashtim është `[AllowAnonymous]`, që i anulon të gjitha. Prandaj `GET /api/courses` punon pa token, ndërsa `POST` kërkon Admin.
 
 ### Hapi 9: Testo me `.http`
 
@@ -280,6 +313,8 @@ Authorization: Bearer {{adminToken}}
 | 12 | Admini vendos notë | admin | **204** | |
 
 Kopjo tokenin nga përgjigja 3 dhe ngjite te [jwt.io](https://jwt.io): do shohësh email-in dhe rolin.
+
+> 💡 **Sqarim:** `# @name admin` i jep emër kërkesës. Rreshti `@adminToken = {{admin.response.body.$.token}}` merr fushën `token` nga JSON-i i përgjigjes (`$` = rrënja e JSON-it). Prandaj kërkesa 3 duhet të dërgohet **para** kërkesave që përdorin `{{adminToken}}`. Nëse rinisni aplikacionin, tokenët mbeten të vlefshëm (çelësi s'ndryshon) deri në skadim, pas 60 minutash.
 
 > Scalar (`/scalar/v1`) mbetet i dobishëm për endpoint-et publike. Për kërkesat me token përdorni skedarin `.http`.
 
@@ -340,6 +375,12 @@ dotnet sln add University.Tests          # nëse keni skedar solution
 Passed!  - Failed: 0, Passed: 5, Skipped: 0, Total: 5
 ```
 
+> 💡 **Sqarim:**
+> - Projekti i testeve është **projekt më vete** (`University.Tests.csproj`) që i referohet projektit kryesor. Kodi i testeve s'publikohet në Azure.
+> - `[Fact]` = test pa parametra. Për të njëjtin test me shumë vlera përdoret `[Theory]` + `[InlineData(...)]`.
+> - Testet e JWT krijojnë token dhe e **lexojnë** sërish për të kontrolluar claims, pa server. Ato do dështonin nëse dikush e heq rolin nga tokeni.
+> - Këto janë **unit tests** (një klasë, pa bazë). Testet që nisin gjithë aplikacionin dhe dërgojnë kërkesa HTTP quhen *integration tests* (`WebApplicationFactory`), por s'i trajtojmë këtu.
+
 > 🧪 Ndryshoni `Math.Round(..., 2)` në `Math.Round(..., 1)` te `GradeService` dhe ekzekutoni sërish. Cili test dështon dhe pse? Ktheni ndryshimin.
 
 ---
@@ -392,6 +433,8 @@ Lokalisht sekretet vijnë nga User Secrets. Në Azure **User Secrets nuk ekzisto
 4. **Networking:** *Public endpoint*, **Allow Azure services and resources to access this server:** *Yes*, **Add current client IP address:** *Yes*.
 5. **Review + create → Create** (1-3 minuta).
 
+> 💡 **Sqarim:** **SQL server**-i është vetëm "adresa" (`emri.database.windows.net`) me adminin dhe firewall-in; vetë **baza** është resurs më vete brenda tij. Firewall-i bllokon çdo lidhje si default: *Allow Azure services* lejon App Service-in, kurse *Add current client IP* lejon kompjuterin tuaj (për Query editor ose SSMS).
+
 ### Hapi 3: Connection string-u
 
 Baza `UniversityDb` → **Settings → Connection strings** → skeda **ADO.NET (SQL authentication)** → kopjo. Zëvendëso `{your_password}` me fjalëkalimin (pa `{ }`):
@@ -417,6 +460,8 @@ Server=tcp:university-sql-emri-juaj.database.windows.net,1433;Initial Catalog=Un
 4. **Review + create → Create** → **Go to resource**.
 
 > Nëse e keni krijuar me Basic authentication të fikur: **Settings → Configuration → General settings → SCM Basic Auth Publishing Credentials: On → Save**.
+
+> 💡 **Sqarim:** **App Service plan** është "kompjuteri" (CPU, RAM, çmimi), kurse **Web App** është aplikacioni që punon në të; në një plan mund të vendosen disa aplikacione. Plani **F1** është falas, por ka kufizime: 60 minuta CPU në ditë, aplikacioni "fle" pas pak kohe pa vizita (kërkesa e parë është e ngadaltë) dhe s'ka domen të vetin. **Basic authentication** do të thotë që publikimi bëhet me përdorues/fjalëkalim, të cilët gjenden brenda publish profile.
 
 ### Hapi 5: Variablat e mjedisit
 
@@ -451,6 +496,8 @@ App Service → **Settings → Environment variables**:
 4. **Publish**. Prit `Publish succeeded` te **Output**.
 
 Ndryshe nga MVC5, **nuk** ka nevojë të vendosni connection string apo "Execute Code First Migrations" te publikimi: connection string-u vjen nga Hapi 5, kurse `db.Database.Migrate()` te `Program.cs` krijon tabelat në nisjen e parë.
+
+> 💡 **Sqarim: çfarë ndodh kur shtypni Publish?** Visual Studio bën `dotnet publish -c Release` (kompajlon DLL-të, kopjon `wwwroot`, Views të kompajluara dhe `appsettings.json`), pastaj i ngarkon skedarët te App Service përmes **Kudu/ZIP deploy** me kredencialet e profilit. App Service e rinis aplikacionin, që lexon variablat e mjedisit nga Hapi 5, aplikon migrimet (`AddIdentity` dhe `InitialCreate`) dhe ekzekuton seed-in. `appsettings.Development.json` dhe User Secrets **nuk** lexohen, sepse ambienti është *Production*.
 
 > **VS Code / CLI:** `dotnet publish -c Release -o publish`, pastaj publikoni dosjen `publish` me zgjerimin **Azure App Service** (klik i djathtë → *Deploy to Web App*).
 
@@ -492,17 +539,84 @@ Pas vlerësimit: **Resource groups → `rg-university-core` → Delete resource 
 
 ## 7. Pyetje kontrolli
 
+> Përpiquni t'u përgjigjeni vetë, pastaj klikoni **Përgjigja** për ta krahasuar.
+
 1. Cili është ndryshimi mes autentikimit dhe autorizimit? Cilin kod HTTP kthen API-ja në secilin rast?
+
+   <details><summary>Përgjigja</summary>
+
+   **Autentikimi** vërteton **kush je** (email + fjalëkalim → cookie/token). **Autorizimi** vendos **a ke leje** për një veprim (rol, policy, pronësi). API-ja kthen **401** kur s'je i autentikuar (pa token ose token i pavlefshëm) dhe **403** kur je i autentikuar, por s'ke leje (p.sh. Ana provon të krijojë kurs).
+   </details>
+
 2. Pse faqet MVC përdorin cookie, kurse API-ja JWT? Çfarë ndodh nëse një klient JS thërret `/Students` (MVC) pa cookie?
+
+   <details><summary>Përgjigja</summary>
+
+   Shfletuesi i dërgon cookie-t **automatikisht**, gjë që është ideale për faqet HTML. Klientët e API-së (mobile, JS në domen tjetër, `.http`) s'kanë "kuti cookie-sh" të përbashkët me serverin; ata e ruajnë tokenin vetë dhe e dërgojnë në header. Edhe redirect-i ndryshon: MVC ridrejton te faqja Login (**302**), që për një klient JS s'ka kuptim. Ai do merrte HTML-në e faqes Login në vend të JSON-it, ndërsa API-ja kthen një **401** të pastër.
+   </details>
+
 3. Pse payload-i i JWT-së nuk duhet të përmbajë fjalëkalime? Atëherë si e dimë që Ana s'e ka ndryshuar rolin e saj në token?
+
+   <details><summary>Përgjigja</summary>
+
+   Payload-i është vetëm **Base64**: kushdo që e ka tokenin e lexon (jwt.io). Rolin s'mund ta ndryshojë, sepse tokeni është **i nënshkruar** me `Jwt:Key`, të cilin e di vetëm serveri. Nëse Ana ndryshon `Student` → `Admin`, nënshkrimi s'përputhet më me përmbajtjen, dhe serveri e refuzon tokenin me **401**.
+   </details>
+
 4. Ku ruhet `Jwt:Key` lokalisht dhe ku në Azure? Pse jo në `appsettings.json`?
+
+   <details><summary>Përgjigja</summary>
+
+   Lokalisht në **User Secrets** (`%APPDATA%\Microsoft\UserSecrets\...`, jashtë projektit). Në Azure si **App setting** `Jwt__Key` (variabël mjedisi). `appsettings.json` shkon në Git/GitHub: kushdo që e sheh çelësin mund të krijojë token **Admin** për veten.
+   </details>
+
 5. Pse `[Authorize(Roles = "Admin,Student")]` nuk mjafton te regjistrimi? Si quhet ky gabim?
+
+   <details><summary>Përgjigja</summary>
+
+   Atributi kontrollon vetëm **llojin** e përdoruesit (a është Student), jo **cilit objekt** i referohet kërkesa. Ana është Student, por mund të dërgojë `studentId: 2` dhe të regjistrojë Drenin. Gabimi quhet **IDOR** (*Insecure Direct Object Reference*) / *Broken Object Level Authorization*. Zgjidhja: kontrolli i pronësisë në kod (email-i i studentit == `User.Identity.Name`).
+   </details>
+
 6. Pse fshehja e butonit "Kurs i ri" te View nuk është mbrojtje?
+
+   <details><summary>Përgjigja</summary>
+
+   View vendos vetëm çfarë **shfaqet**. Kushdo mund ta shkruajë `/Courses/Create` direkt në shfletues, ose të dërgojë `POST` me Postman/`.http`. Mbrojtja duhet të jetë **në server**: `[Authorize(Roles = "Admin")]` te controller-i. Fshehja e butonit është vetëm për përvojë më të mirë (UX).
+   </details>
+
 7. Pse `AuthApiController.Login` kthen të njëjtin 401 për email të panjohur dhe për fjalëkalim të gabuar?
+
+   <details><summary>Përgjigja</summary>
+
+   Nëse përgjigjet do ndryshonin ("email-i s'ekziston" vs "fjalëkalim i gabuar"), sulmuesi do mund të zbulonte cilat email-e kanë llogari (*user enumeration*), pastaj t'i sulmonte vetëm ato. Me përgjigje të njëjtë, ai s'mëson asgjë.
+   </details>
+
 8. Pse testet e `GradeService` s'kanë nevojë për bazë të dhënash?
+
+   <details><summary>Përgjigja</summary>
+
+   `GradeService.Average` merr një listë notash dhe kthen një numër: s'varet nga EF, HTTP apo ndonjë shërbim tjetër. Logjikën e kemi **ndarë** nga qasja në të dhëna, prandaj e testojmë direkt me `new GradeService()`. Testet janë të shpejta, të përsëritshme dhe s'prishen nga gjendja e bazës.
+   </details>
+
 9. Pse në Azure përdorim `Jwt__Key` dhe jo `Jwt:Key`?
+
+   <details><summary>Përgjigja</summary>
+
+   App Service në **Linux** i jep konfigurimin si variabla mjedisi, dhe Linux s'lejon `:` në emrat e tyre. ASP.NET Core e kthen automatikisht `__` (dy nënvija) në `:`, kështu që `Jwt__Key` lexohet si `Jwt:Key` dhe kodi s'ndryshon.
+   </details>
+
 10. Pse nuk na duhet "Execute Code First Migrations" gjatë publikimit, si në MVC5?
+
+    <details><summary>Përgjigja</summary>
+
+    Sepse `Program.cs` thërret `db.Database.Migrate()` në çdo nisje: aplikacioni vetë i aplikon migrimet që mungojnë (`InitialCreate`, `AddIdentity`) dhe ekzekuton seed-in. Connection string-u vjen nga variablat e mjedisit të App Service, jo nga profili i publikimit.
+    </details>
+
 11. Pse Scalar s'hapet në Azure? A është kjo mirë apo keq?
+
+    <details><summary>Përgjigja</summary>
+
+    `MapOpenApi()` dhe `MapScalarApiReference()` thirren vetëm brenda `if (app.Environment.IsDevelopment())`, ndërsa Azure punon në *Production*. Zakonisht është **mirë**: dokumentimi i plotë i API-së i ndihmon edhe sulmuesit të gjejnë endpoint-e. Nëse API-ja është publike dhe duam dokumentim, mund ta hapim qëllimisht (ose ta mbrojmë me autentikim).
+    </details>
 
 ---
 
