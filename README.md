@@ -20,7 +20,7 @@ Fakulteti i Shkencave të Informatikës, Universiteti "Nënë Tereza", Shkup · 
 | Ushtrimi | Tema | Teknologjitë |
 | --- | --- | --- |
 | [WebAPI](MVC5/WebAPI) | Web API për studentë dhe kurse, me dy klientë (jQuery dhe MVC) | MVC 5, Web API 2, EF6, LocalDB, Postman |
-
+| [University](Core10/University) | Ushtrim gjithëpërfshirës: universiteti, në dy pjesë | ASP.NET Core 10, EF Core 10, Identity, JWT, xUnit, Azure |
 Ushtrimet e tjera shtohen gjatë semestrit.
 
 ## Kërkesat për MVC 5
@@ -28,6 +28,11 @@ Ushtrimet e tjera shtohen gjatë semestrit.
 - Visual Studio 2022 me workload-et **ASP.NET and web development** dhe **Data storage and processing**
 - .NET Framework 4.8 dhe SQL Server LocalDB (instalohen me Visual Studio)
 - Postman, për ushtrimet me Web API
+
+## Kërkesat për ASP.NET Core 10
+
+- Visual Studio 2026 (ose VS Code me C# Dev Kit) dhe .NET 10 SDK
+- SQL Server LocalDB; llogari Azure for Students për publikimin
 
 ## Struktura
 
@@ -38,6 +43,11 @@ aspnet-mvc-ushtrime/
 │       ├── README.md              ← ushtrimi
 │       ├── Kodi/                  ← klasat e ushtrimit
 │       └── img/                   ← vizatimet
-└── Core10/                        ← ushtrimet me ASP.NET Core 10
+└── Core10/
+    └── University/
+        ├── Pjesa1.md              ← MVC + Web API + EF Core
+        ├── Pjesa2.md              ← Identity, JWT, testet, Azure
+        ├── Kodi/                  ← klasat (Pjesa1, Pjesa2)
+        └── img/                   ← vizatimet dhe screenshot-et
 ```
 

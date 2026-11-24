@@ -1,0 +1,24 @@
+@* Pjesa e djathtë e menysë. "User" = përdoruesi aktual (nga cookie-ja). *@
+<ul class="navbar-nav">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <li class="nav-item">
+            <span class="nav-link text-dark">
+                @User.Identity.Name
+                @* Rolet ruhen si "claims" të tipit ClaimTypes.Role *@
+                (@string.Join(", ", User.FindAll(ClaimTypes.Role).Select(c => c.Value)))
+            </span>
+        </li>
+        <li class="nav-item">
+            @* Logout me POST + anti-forgery token (Tag Helper-i <form> e shton vetë) *@
+            <form asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                <button type="submit" class="nav-link btn btn-link text-dark">Dil</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item"><a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Regjistrohu</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Hyr</a></li>
+    }
+</ul>

@@ -1,0 +1,49 @@
+@model Course
+@{
+    ViewData["Title"] = "Kurs i ri";
+}
+
+<h1>Kurs i ri</h1>
+
+@* Tag Helper-at asp-for lidhin fushën me property-n e modelit:
+   emri, vlera, atributet e validimit (data-val-*) gjenerohen vetë.
+   <form> shton automatikisht tokenin anti-forgery (CSRF). *@
+<form asp-action="Create" method="post" class="col-md-6">
+    @* ModelOnly = shfaq vetëm gabimet e përgjithshme (jo ato të fushave) *@
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Code" class="form-label">Kodi</label>
+        <input asp-for="Code" class="form-control" />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">Titulli</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Credits" class="form-label">Kreditet</label>
+        <input asp-for="Credits" class="form-control" />
+        <span asp-validation-for="Credits" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DepartmentId" class="form-label">Departamenti</label>
+        @* asp-items: listat e mbushura te controller-i (LoadListsAsync) *@
+        <select asp-for="DepartmentId" asp-items="(SelectList)ViewBag.Departments" class="form-select"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ProfessorId" class="form-label">Profesori</label>
+        <select asp-for="ProfessorId" asp-items="(SelectList)ViewBag.Professors" class="form-select">
+            <option value="">-- pa profesor --</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ruaj</button>
+    <a asp-action="Index" class="btn btn-link">Anulo</a>
+</form>
+
+@* Validimi në shfletues (jQuery Validation) - i njëjti rregull si [Required], [Range] *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-label="Modeli i të dhënave: Faculty, Department, Professor, Course, Student, Enrollment" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12">
+<defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6b6b6b"/></marker><marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2e7d32"/></marker><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f6fd6"/></marker></defs>
+<rect width="960" height="500" fill="#ffffff"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#1f2328" text-anchor="start">Modeli i të dhënave (ER) - Universiteti</text>
+<rect x="20" y="60" width="210" height="76" rx="8" fill="#ffffff" stroke="#2f6fd6" stroke-width="1.5"/>
+<path d="M20 90V68a8 8 0 0 1 8 -8H222a8 8 0 0 1 8 8V90z" fill="#2f6fd6"/>
+<text x="125.0" y="80" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">Faculty</text>
+<text x="30" y="108" font-size="11.5" font-weight="600" fill="#b26a00" text-anchor="start" font-family="Consolas, monospace">PK Id</text>
+<text x="30" y="127" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Name</text>
+<rect x="330" y="60" width="210" height="95" rx="8" fill="#ffffff" stroke="#2f6fd6" stroke-width="1.5"/>
+<path d="M330 90V68a8 8 0 0 1 8 -8H532a8 8 0 0 1 8 8V90z" fill="#2f6fd6"/>
+<text x="435.0" y="80" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">Department</text>
+<text x="340" y="108" font-size="11.5" font-weight="600" fill="#b26a00" text-anchor="start" font-family="Consolas, monospace">PK Id</text>
+<text x="340" y="127" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Name</text>
+<text x="340" y="146" font-size="11.5" font-weight="600" fill="#2f6fd6" text-anchor="start" font-family="Consolas, monospace">FK FacultyId</text>
+<rect x="690" y="60" width="210" height="114" rx="8" fill="#ffffff" stroke="#7b3fa0" stroke-width="1.5"/>
+<path d="M690 90V68a8 8 0 0 1 8 -8H892a8 8 0 0 1 8 8V90z" fill="#7b3fa0"/>
+<text x="795.0" y="80" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">Professor</text>
+<text x="700" y="108" font-size="11.5" font-weight="600" fill="#b26a00" text-anchor="start" font-family="Consolas, monospace">PK Id</text>
+<text x="700" y="127" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">FirstName, LastName</text>
+<text x="700" y="146" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Email</text>
+<text x="700" y="165" font-size="11.5" font-weight="600" fill="#2f6fd6" text-anchor="start" font-family="Consolas, monospace">FK DepartmentId</text>
+<rect x="330" y="290" width="210" height="152" rx="8" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+<path d="M330 320V298a8 8 0 0 1 8 -8H532a8 8 0 0 1 8 8V320z" fill="#2e7d32"/>
+<text x="435.0" y="310" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">Course</text>
+<text x="340" y="338" font-size="11.5" font-weight="600" fill="#b26a00" text-anchor="start" font-family="Consolas, monospace">PK Id</text>
+<text x="340" y="357" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Code (unik)</text>
+<text x="340" y="376" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Title</text>
+<text x="340" y="395" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Credits (1-12)</text>
+<text x="340" y="414" font-size="11.5" font-weight="600" fill="#2f6fd6" text-anchor="start" font-family="Consolas, monospace">FK DepartmentId</text>
+<text x="340" y="433" font-size="11.5" font-weight="600" fill="#2f6fd6" text-anchor="start" font-family="Consolas, monospace">FK ProfessorId? (opsional)</text>
+<rect x="20" y="290" width="210" height="114" rx="8" fill="#ffffff" stroke="#b26a00" stroke-width="1.5"/>
+<path d="M20 320V298a8 8 0 0 1 8 -8H222a8 8 0 0 1 8 8V320z" fill="#b26a00"/>
+<text x="125.0" y="310" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">Enrollment</text>
+<text x="30" y="338" font-size="11.5" font-weight="600" fill="#b26a00" text-anchor="start" font-family="Consolas, monospace">PK Id</text>
+<text x="30" y="357" font-size="11.5" font-weight="600" fill="#2f6fd6" text-anchor="start" font-family="Consolas, monospace">FK StudentId</text>
+<text x="30" y="376" font-size="11.5" font-weight="600" fill="#2f6fd6" text-anchor="start" font-family="Consolas, monospace">FK CourseId</text>
+<text x="30" y="395" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Grade? (5-10)</text>
+<rect x="690" y="290" width="210" height="114" rx="8" fill="#ffffff" stroke="#b26a00" stroke-width="1.5"/>
+<path d="M690 320V298a8 8 0 0 1 8 -8H892a8 8 0 0 1 8 8V320z" fill="#b26a00"/>
+<text x="795.0" y="310" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">Student</text>
+<text x="700" y="338" font-size="11.5" font-weight="600" fill="#b26a00" text-anchor="start" font-family="Consolas, monospace">PK Id</text>
+<text x="700" y="357" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">FirstName, LastName</text>
+<text x="700" y="376" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">StudentNumber (unik)</text>
+<text x="700" y="395" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="start" font-family="Consolas, monospace">Email</text>
+<path d="M230 95H330" fill="none" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="240" y="88" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">1</text>
+<text x="320" y="88" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">N</text>
+<text x="280" y="112" font-size="10.5" font-weight="400" fill="#59636e" text-anchor="middle">ka</text>
+<path d="M540 95H690" fill="none" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="550" y="88" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">1</text>
+<text x="680" y="88" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">N</text>
+<text x="615" y="112" font-size="10.5" font-weight="400" fill="#59636e" text-anchor="middle">ka</text>
+<path d="M435 155V290" fill="none" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="445" y="171" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">1</text>
+<text x="445" y="284" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">N</text>
+<text x="470" y="200" font-size="10.5" font-weight="400" fill="#59636e" text-anchor="middle">ofron</text>
+<path d="M795 174V250H500V290" fill="none" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="815" y="190" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">0..1</text>
+<text x="510" y="284" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">N</text>
+<text x="650" y="243" font-size="10.5" font-weight="400" fill="#59636e" text-anchor="middle">jep (mund të mungojë)</text>
+<path d="M330 330H230" fill="none" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="320" y="323" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">1</text>
+<text x="240" y="323" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">N</text>
+<path d="M795 404V470H125V404" fill="none" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="805" y="420" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">1</text>
+<text x="135" y="420" font-size="12" font-weight="700" fill="#59636e" text-anchor="middle">N</text>
+<text x="460" y="488" font-size="11.5" font-weight="600" fill="#b26a00" text-anchor="middle">Enrollment = tabela lidhëse SHUMË-ME-SHUMË (Student ↔ Course) me kolonën shtesë Grade</text>
+<text x="20" y="488" font-size="10.5" font-weight="600" fill="#b26a00" text-anchor="start">PK = çelës primar</text>
+<text x="940" y="488" font-size="10.5" font-weight="600" fill="#2f6fd6" text-anchor="end">FK = çelës i huaj</text>
+</svg>

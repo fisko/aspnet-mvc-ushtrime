@@ -1,0 +1,29 @@
+@model Student
+@{
+    ViewData["Title"] = Model.FullName;
+    // ViewBag është "dynamic" -> duhet cast në tipin e duhur.
+    var average = (double?)ViewBag.Average;
+}
+
+<h1>@Model.FullName</h1>
+<p class="text-muted">@Model.StudentNumber · @Model.Email</p>
+
+<h4>Kurset e regjistruara</h4>
+<table class="table">
+    <thead>
+        <tr><th>Kursi</th><th>Nota</th></tr>
+    </thead>
+    <tbody>
+        @* Enrollments dhe Course janë ngarkuar me Include/ThenInclude te controller-i *@
+        @foreach (var e in Model.Enrollments)
+        {
+            <tr>
+                <td>@e.Course?.Title</td>
+                <td>@(e.Grade?.ToString() ?? "-")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p><strong>Mesatarja:</strong> @(average?.ToString("0.00") ?? "-")</p>
+<a asp-action="Index">Kthehu</a>
