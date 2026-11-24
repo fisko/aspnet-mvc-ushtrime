@@ -1392,7 +1392,7 @@ Deri tani API-ja ekzekutohet vetëm në kompjuterin tënd (IIS Express dhe Local
 
 Visual Studio lidhet me App Service përmes **publish profile**, një skedari që përmban adresën e serverit dhe kredencialet e publikimit. Ai gjithashtu e ndërron connection string-un e LocalDB me atë të Azure SQL dhe ekzekuton migrations në databazën e re.
 
-![Visual Studio publikon në App Service, që lidhet me Azure SQL](img/09-azure-deploy.svg)
+![Resurset e Azure që krijohen dhe çfarë deplojohet te secili](img/09-azure-deploy.svg)
 
 ### Hapat
 
