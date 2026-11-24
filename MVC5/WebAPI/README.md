@@ -2,7 +2,7 @@
 
 ⬅️ [Kthehu te lista e ushtrimeve](../../README.md)
 
-**Kohëzgjatja:** 90 minuta · **Niveli:** fillestar · **Mjetet:** Visual Studio 2022, .NET Framework 4.8, EF6, SQL Server LocalDB, Postman
+**Kohëzgjatja:** 105 minuta · **Niveli:** fillestar · **Mjetet:** Visual Studio 2022, .NET Framework 4.8, EF6, SQL Server LocalDB, Postman, llogari Azure
 
 > **Nëse ngec:** te folderi [Kodi](Kodi) gjen klasat e ushtrimit që mund t'i krahasosh ose t'i kopjosh.
 
@@ -17,6 +17,7 @@
 - [Pjesa 5: Enrollments dhe testimi me Postman](#pjesa-5-enrollments-dhe-testimi-me-postman-7-min)
 - [Pjesa 6: Klienti 1, faqe me jQuery](#pjesa-6-klienti-1-faqe-me-jquery-brenda-projektit-web-api-15-min)
 - [Pjesa 7: Klienti 2, projekt i ri MVC me CRUD](#pjesa-7-klienti-2-projekt-i-ri-mvc-me-crud-25-min)
+- [Pjesa 8: Publikimi në Azure (App Service dhe Azure SQL)](#pjesa-8-publikimi-në-azure-app-service-dhe-azure-sql-15-min)
 - [Përmbledhje dhe detyra për ushtrim](#përmbledhje-dhe-detyra-për-ushtrim)
 
 ## Çfarë është Web API?
@@ -35,7 +36,7 @@ Në këtë ushtrim do ndërtosh një Web API për studentë dhe kurse, dhe do e 
 
 ## Çfarë do ndërtosh
 
-Në 90 minuta do ndërtosh një sistem të vogël për universitetin: një Web API për studentë dhe kurse (me Entity Framework 6 dhe SQL Server LocalDB), dhe dy klientë që përdorin të njëjtin API. Qëllimi nuk është të kopjosh kod, por të kuptosh si komunikojnë klienti dhe API.
+Në 105 minuta do ndërtosh një sistem të vogël për universitetin: një Web API për studentë dhe kurse (me Entity Framework 6 dhe SQL Server LocalDB), dhe dy klientë që përdorin të njëjtin API. Qëllimi nuk është të kopjosh kod, por të kuptosh si komunikojnë klienti dhe API.
 
 | Pjesa | Tema | Koha |
 | --- | --- | --- |
@@ -46,6 +47,7 @@ Në 90 minuta do ndërtosh një sistem të vogël për universitetin: një Web A
 | 5 | Enrollments dhe testimi me Postman | 7 min |
 | 6 | Klienti 1: faqe me jQuery brenda projektit Web API | 15 min |
 | 7 | Klienti 2: projekt i ri MVC me CRUD | 25 min |
+| 8 | Publikimi në Azure: App Service, Azure SQL dhe publish profile | 15 min |
 
 Secila pjesë ka të njëjtën rrjedhë: teori, një vizatim që e bën të dukshme konceptin, hapat e projektit, një pikë kontrolli dhe pyetje kontrolli. Mos kalo te pjesa tjetër përpara se të kalosh pikën e kontrollit.
 
@@ -55,6 +57,7 @@ Secila pjesë ka të njëjtën rrjedhë: teori, një vizatim që e bën të duks
 - .NET Framework 4.8 dhe SQL Server LocalDB (instalohen bashkë me Visual Studio)
 - Postman (falas, nga postman.com)
 - Chrome ose Edge
+- Llogari Azure me abonim aktiv (p.sh. Azure for Students ose provë falas), vetëm për Pjesën 8
 - Emrat e projekteve, klasave dhe metodave shkruaji saktësisht si në ushtrim, sepse kodi i pjesëve të ardhshme mbështetet mbi këta emra.
 
 ## Pjesa 1: Hyrje në Web API dhe krijimi i projektit (8 min)
@@ -1378,9 +1381,124 @@ Klienti MVC duhet të duket kështu: lista e studentëve dhe forma Create.
 3. Pse `HttpClient` është `static` te `ApiClient`?
 4. Pse metodat e controller-it janë `async` dhe përdorin `await`?
 
+## Pjesa 8: Publikimi në Azure (App Service dhe Azure SQL) (15 min)
+
+### Teoria
+
+Deri tani API-ja ekzekutohet vetëm në kompjuterin tënd (IIS Express dhe LocalDB). Që të përdoret nga të tjerët, duhet të publikohet në një server që është i ndezur gjithmonë. Në Azure kjo kërkon dy shërbime:
+
+- **App Service**: ku ekzekutohet aplikacioni (Web API). Ne përdorim Windows me ASP.NET 4.8, sepse .NET Framework punon vetëm në Windows.
+- **Azure SQL Database**: zëvendëson LocalDB. LocalDB ekziston vetëm në kompjuterin tënd, ndaj App Service nuk mund ta arrijë.
+
+Visual Studio lidhet me App Service përmes **publish profile**, një skedari që përmban adresën e serverit dhe kredencialet e publikimit. Ai gjithashtu e ndërron connection string-un e LocalDB me atë të Azure SQL dhe ekzekuton migrations në databazën e re.
+
+![Resurset e Azure që krijohen dhe çfarë deplojohet te secili](img/09-azure-deploy.svg)
+
+### Hapat
+
+**Hapi 1: Resource group**
+
+1. Hap [portal.azure.com](https://portal.azure.com) dhe kliko **Create a resource → Resource group** (ose kërko "Resource groups" → **Create**).
+2. **Resource group:** `rg-university`, **Region:** `West Europe`. Kliko **Review + create → Create**.
+
+Resource group është folderi që mban të gjitha resurset e ushtrimit. Në fund e fshin një herë dhe fshihet gjithçka.
+
+**Hapi 2: Azure SQL Database**
+
+1. Kërko **SQL databases** → **Create**.
+2. Te skeda **Basics**:
+   - **Resource group:** `rg-university`
+   - **Database name:** `UniversityDb`
+   - **Server:** kliko **Create new** → **Server name:** `university-sql-emri-juaj` (duhet të jetë unik në botë, vetëm shkronja të vogla, numra dhe viza), **Location:** `West Europe`, **Authentication method:** *Use SQL authentication*, **Server admin login:** `sqladmin`, një **Password** i fortë. Ruaje password-in diku, sepse nuk shfaqet më. Kliko **OK**.
+   - **Workload environment:** *Development*. Nëse shfaqet **Compute + storage**, zgjidh **Basic** ose *serverless* (më i lirë).
+3. Te skeda **Networking**:
+   - **Allow Azure services and resources to access this server:** *Yes*
+   - **Add current client IP address:** *Yes*
+4. Kliko **Review + create → Create**. Prit 1-3 minuta.
+
+**Hapi 3: Connection string i Azure SQL**
+
+1. Hap databazën `UniversityDb` → **Settings → Connection strings**.
+2. Kopjo vlerën e skedës **ADO.NET (SQL authentication)**.
+3. Zëvendëso `{your_password}` me password-in tënd dhe fshi shenjat `{ }`. Në fund shto `MultipleActiveResultSets=True;`, si te connection string-u i LocalDB. Duhet të duket kështu:
+
+```text
+Server=tcp:university-sql-emri-juaj.database.windows.net,1433;Initial Catalog=UniversityDb;Persist Security Info=False;User ID=sqladmin;Password=PASSWORDI-JUAJ;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+```
+
+Ruaje në një skedar të përkohshëm (Notepad). Do e përdorësh në Hapin 6.
+
+**Hapi 4: App Service**
+
+1. Kërko **App Services** → **Create → Web App**.
+2. Te skeda **Basics**:
+   - **Resource group:** `rg-university`
+   - **Name:** `university-api-emri-juaj` (unik; bëhet adresa `https://university-api-emri-juaj.azurewebsites.net`)
+   - **Publish:** *Code*
+   - **Runtime stack:** *ASP.NET V4.8*
+   - **Operating System:** *Windows*
+   - **Region:** `West Europe`
+   - **Pricing plan:** kliko **Create new**, dhe te **Pricing plan** zgjidh **Free F1** (te **Explore**)
+3. Te skeda **Deployment**, nëse sheh **Basic authentication**, zgjidhe **Enable**. Publish profile punon vetëm me këtë opsion të ndezur.
+4. Kliko **Review + create → Create**, pastaj **Go to resource**.
+
+Nëse e ke krijuar pa e ndezur, hap App Service → **Settings → Configuration → General settings** dhe vendos **SCM Basic Auth Publishing Credentials** në *On*, pastaj **Save**.
+
+**Hapi 5: Shkarko publish profile**
+
+1. Te faqja **Overview** e App Service kliko **Download publish profile** (në menynë e sipërme, ose te **Get publish profile**).
+2. Shkarkohet skedari `university-api-emri-juaj.PublishSettings`. Ruaje jashtë folderit të projektit.
+
+> **Kujdes:** skedari përmban password-in e publikimit. Mos e ngarko në GitHub dhe mos e ndaj me të tjerët.
+
+**Hapi 6: Publiko nga Visual Studio**
+
+1. Te projekti `UniversityApi` kliko me të djathtën → **Publish**.
+2. Kliko **Add a publish profile → Import Profile** dhe zgjidh skedarin `.PublishSettings`. Kliko **Finish**.
+3. Kliko **Show all settings** (ose **More actions → Edit**), pastaj hap skedën **Settings**:
+   - **Configuration:** `Release`
+   - Zgjero **Databases**. Te rreshti `UniversityContext` ngjit connection string-un e Hapit 3 te **Connection string**.
+   - Vendos shenjën te **Execute Code First Migrations (runs on application start)**.
+4. Kliko **Save**, pastaj **Publish**. Prit derisa te **Output** shfaqet `Publish succeeded`.
+
+Me këto cilësime Visual Studio ndërron connection string-un te `Web.config` i publikuar (kopja në kompjuterin tënd mbetet me LocalDB). Migrations ekzekutohen kur aplikacioni merr kërkesën e parë, dhe me ta edhe metoda `Seed`.
+
+**Hapi 7: Provo API-n në Azure**
+
+1. Në browser hap `https://university-api-emri-juaj.azurewebsites.net/api/students`. Kërkesa e parë zgjat disa sekonda, sepse në atë moment krijohen tabelat dhe studentët fillestarë. Duhet të shohësh të njëjtin JSON si në Pjesën 4.
+2. Hap `https://university-api-emri-juaj.azurewebsites.net/Home/Students`. Faqja jQuery punon pa ndryshim, sepse përdor adresë relative (`/api/students`).
+3. Në Postman ndrysho adresën bazë nga `http://localhost:5050` në adresën e Azure dhe përsërit testet nga Pjesa 5. Kodet e statusit duhet të jenë të njëjta.
+4. Provo edhe databazën: në Azure Portal hap `UniversityDb` → **Query editor**, hyr me `sqladmin` dhe ekzekuto `SELECT * FROM Students`.
+
+**Hapi 8: Fshi resurset (rëndësishme)**
+
+Kur të përfundosh, hap **Resource groups → `rg-university` → Delete resource group**, shkruaj emrin dhe konfirmo. Kështu nuk ngelen shërbime që mund të kushtojnë.
+
+### Pika e kontrollit
+
+- `https://emri-juaj.azurewebsites.net/api/students` kthen listën e studentëve.
+- Faqja `/Home/Students` në Azure shfaq tabelën dhe lejon Shto dhe Fshij.
+- Në Postman, POST kthen 201 dhe GET me Id që nuk ekziston kthen 404, në adresën e Azure.
+- Në Query editor tabela `Students` ka të dhënat.
+
+### Pyetje kontrolli
+
+1. Pse API-ja nuk mund të përdorë LocalDB pasi publikohet në Azure?
+2. Çfarë përmban publish profile dhe pse nuk duhet ndarë me të tjerët?
+3. Pse kërkesa e parë te API-ja në Azure zgjat më shumë se të tjerat?
+4. Pse faqja jQuery nuk ka nevojë për ndryshim pas publikimit?
+
+### Gabimet e zakonshme në Azure
+
+- **Publish dështon me gabim autentikimi:** Basic authentication është i fikur. Ndize siç tregon Hapi 4 dhe shkarko publish profile të ri.
+- **`Cannot open server ... requested by the login`:** emri i serverit ose firewall. Kontrollo që **Allow Azure services** është *Yes* te SQL server → **Networking**.
+- **`Login failed for user 'sqladmin'`:** password-i në connection string është gabim ose ka ngelur me `{ }`.
+- **`/api/students` kthen 500 dhe databaza është bosh:** nuk është vënë shenja te **Execute Code First Migrations**, ose connection string-u është ngjitur te rreshti i gabuar. Rishiko Hapin 6 dhe publiko përsëri.
+- **Faqja hapet shumë ngadalë pas pak kohe pa përdorim:** plani Free e fle aplikacionin kur nuk përdoret. Kërkesa e parë e zgjon.
+
 ## Përmbledhje dhe detyra për ushtrim
 
-Ndërtove një Web API për studentë dhe kurse dhe e përdore nga katër klientë: browser-i, Postman, një faqe me jQuery dhe një projekt MVC. Të gjithë përdorin të njëjtën API, me të njëjtat folje HTTP dhe të njëjtat kode statusi.
+Ndërtove një Web API për studentë dhe kurse dhe e përdore nga katër klientë: browser-i, Postman, një faqe me jQuery dhe një projekt MVC. Të gjithë përdorin të njëjtën API, me të njëjtat folje HTTP dhe të njëjtat kode statusi. Në fund e publikove API-n në Azure (App Service dhe Azure SQL), kështu që çdokush mund ta përdorë përmes internetit.
 
 | Klienti | Kush dërgon kërkesën | Ku ekzekutohet | Duhet CORS? |
 | --- | --- | --- | --- |
